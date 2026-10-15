@@ -546,6 +546,41 @@ window.DomainLoader = {
     // Path to a simple fallback icon used when a requested icon is missing.
     defaultIcon: 'assets/icons/defaults/missing-icon.svg',
     iconUrlCache: new Map(),
+    serverIconRequests: new Map(),
+    iconAssetVersion: Date.now(),
+
+    resetIconCache: function() {
+        this.iconUrlCache.clear();
+        this.serverIconRequests.clear();
+        this.iconAssetVersion = Math.max(Date.now(), this.iconAssetVersion + 1);
+    },
+
+    // Workspace assets are offline fallbacks. A copied PNG in the workspace
+    // must not hide a replacement at the same path on the running server.
+    resolveServerDomainIcon: async function(source) {
+        if (!source.startsWith('assets/domains/') || typeof fetch !== 'function') {
+            return null;
+        }
+        if (!this.serverIconRequests.has(source)) {
+            const url = new URL('/' + source, window.location.href);
+            url.searchParams.set('iconVersion', String(this.iconAssetVersion));
+            const requestUrl = url.pathname + url.search;
+            const request = (async () => {
+                try {
+                    const response = await fetch(requestUrl, { cache: 'reload' });
+                    const contentType = response.headers?.get('content-type') || '';
+                    if (!response.ok || (contentType && !contentType.startsWith('image/'))) {
+                        return null;
+                    }
+                    return requestUrl;
+                } catch (_) {
+                    return null;
+                }
+            })();
+            this.serverIconRequests.set(source, request);
+        }
+        return this.serverIconRequests.get(source);
+    },
 
     rewriteLegacyIconPath: function(iconPath) {
         if (typeof iconPath !== 'string' || iconPath.length === 0) {
@@ -672,11 +707,18 @@ window.DomainLoader = {
             return this.defaultIcon;
         }
 
+        const source = mapped || normalized;
+        const serverIcon = await this.resolveServerDomainIcon(source);
+        if (serverIcon) {
+            this.iconUrlCache.set(normalized, serverIcon);
+            this.iconUrlCache.set(source, serverIcon);
+            return serverIcon;
+        }
+
         if (this.iconUrlCache && this.iconUrlCache.has(normalized)) {
             return this.iconUrlCache.get(normalized);
         }
 
-        const source = mapped || normalized;
         if (this.iconUrlCache && this.iconUrlCache.has(source)) {
             const cached = this.iconUrlCache.get(source);
             if (mapped && this.iconUrlCache) {
@@ -2001,7 +2043,10 @@ window.DomainLoader = {
     },
 
     // Force reload a domain's type definitions by bypassing cached data
-    forceReloadDomain: async function(domainKey) {
+    forceReloadDomain: async function(domainKey, options = {}) {
+        if (options.resetIcons !== false) {
+            this.resetIconCache();
+        }
         this.clearDomainCache(domainKey);
         const domain = this.availableDomains[domainKey];
         if (domain) {
@@ -2015,6 +2060,7 @@ window.DomainLoader = {
     forceReloadAllDomains: async function() {
 
         const previousActive = new Set(this.activeDomains);
+        this.resetIconCache();
 
         await this.moveLocalConfigFilesToTmp();
 
@@ -2029,7 +2075,7 @@ window.DomainLoader = {
         );
 
         const keys = Object.keys(this.availableDomains || {}).filter(key => key !== 'default');
-        const reloadPromises = keys.map(key => this.forceReloadDomain(key));
+        const reloadPromises = keys.map(key => this.forceReloadDomain(key, { resetIcons: false }));
         await Promise.all(reloadPromises);
 
         this.rebuildActiveConfiguration();
