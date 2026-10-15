@@ -340,12 +340,14 @@ app.use(
 );
 app.use(express.json({ limit: '5mb' }));
 
-// Serve cached static JavaScript files
+// Serve JavaScript without an immutable long-term cache. The application loads
+// source files by stable URLs, so immutable caching would hide local updates
+// until the browser cache is manually cleared.
 app.use(
     '/js',
     express.static(JS_DIR, {
-        immutable: true,
-        maxAge: '1y'
+        immutable: false,
+        maxAge: 0
     })
 );
 

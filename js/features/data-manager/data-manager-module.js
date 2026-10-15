@@ -1147,7 +1147,36 @@ class DataManagerModule {
                 return styleColor;
             }
 
-            return window.QuantickleConfig?.defaultNodeColor || '#ffffff';
+            // A loaded graph may omit per-node colors intentionally so the
+            // active node-type definition supplies the appearance. Resolve
+            // that type color before falling back to the global default; the
+            // latter would otherwise mask the type color during rendering.
+            const nodeType = typeof data.type === 'string' && data.type.trim()
+                ? data.type.trim()
+                : 'default';
+
+            const typeKeys = [nodeType];
+            if (window.DomainLoader) {
+                if (typeof window.DomainLoader.getCanonicalTypeKey === 'function') {
+                    typeKeys.push(window.DomainLoader.getCanonicalTypeKey(nodeType));
+                }
+                if (typeof window.DomainLoader.getLegacyTypeKey === 'function') {
+                    typeKeys.push(window.DomainLoader.getLegacyTypeKey(nodeType));
+                }
+            }
+
+            for (const typeKey of typeKeys) {
+                const typeColor = typeKey && window.NodeTypes?.[typeKey]?.color;
+                if (typeof typeColor === 'string' && typeColor.trim() !== '') {
+                    return typeColor;
+                }
+            }
+
+            // Leave the value unset here when no explicit or type color exists.
+            // GraphRenderer.normalizeNodeData() resolves the active type and
+            // global defaults at render time; storing the global fallback here
+            // would make it look like an explicit per-node color.
+            return undefined;
         };
 
         if (node.data) {

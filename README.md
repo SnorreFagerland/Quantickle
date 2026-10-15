@@ -323,7 +323,7 @@ cy.layout({
 }).run();
 ```
 
-See `graphs/radial_time_rings.qut` for a small fixture that demonstrates concentric time bands grouped by cluster/type metadata.
+The bundled `.qut` examples are under [`assets/examples/`](./assets/examples/). The repository does not currently include a dedicated radial-recency fixture.
 
 ### Timeline Scatter Layout
 
@@ -401,17 +401,12 @@ Quantickle initializes through the global `window.QuantickleApp` defined in [`js
 ## Configuration
 
 ### Performance Settings
-```javascript
-// js/config.js
-const config = {
-  performance: {
-    nodeLimit: 1000,           // Max nodes to render at once
-    batchSize: 100,           // Nodes to add per batch
-    webgl: true,              // Enable WebGL rendering
-    hideEdgesOnViewport: false // Hide edges while dragging
-  }
-}
-```
+
+The active defaults are defined in `window.QuantickleConfig` in
+[`js/config.js`](./js/config.js). The application uses a 15,000-node processing
+limit by default and can lower detail automatically for large graphs. WebGL is
+feature-detected at runtime and falls back to Canvas when unavailable; it is not
+enabled by a `config.performance.webgl` setting.
 
 <a id="api"></a>
 ## API
@@ -552,12 +547,11 @@ quantickle/
 1. **Graph Not Rendering**
    - Check browser console for errors
    - Verify data format
-   - Check WebGL support
+   - Check WebGL support; the renderer falls back to Canvas when unavailable
 
 2. **Poor Performance**
-   - Reduce node limit in config
-   - Enable WebGL rendering
-   - Use simpler layouts for large graphs
+   - Reduce the data-manager node limit if needed
+   - Use the built-in performance controls/LOD behavior and simpler layouts for large graphs
 
 3. **Layout Issues**
    - Try different layout algorithms
@@ -585,5 +579,4 @@ This project is licensed under the Apache 2.0 License - see the LICENSE file for
 - [Graph File Management](./GRAPH_FILE_MANAGEMENT_README.md)
 - [Neo4j Integration](./NEO4J_INTEGRATION_README.md)
 - [Coordinate System](./COORDINATE_SYSTEM.md)
-- [Performance Guide](./PERFORMANCE.md)
 

@@ -85,11 +85,11 @@ Node `info` fields store optional markdown-formatted text.
 ### File Organization
 ```
 quantickle/
-├── assets/examples/example.qut    # Pre-created example graph
+├── assets/examples/*.qut           # Bundled example graphs
 ├── js/features/file-manager/      # File management module
 │   └── file-manager-module.js
 ├── js/graph-manager.js            # Graph data operations
-├── index.html                     # Main application
+├── public/index.html              # Main application
 └── GRAPH_FILE_MANAGEMENT_README.md
 ```
 
@@ -168,6 +168,7 @@ Export graph in different formats:
 - `'csv'` - CSV format
 - `'png'` - PNG image
 - `'pdf'` - PDF document
+- `'html'` - Self-contained static HTML export
 
 
 ### GraphManager Module
@@ -192,7 +193,7 @@ Export current graph in specified format.
 
 ## Example Graph Structure
 
-The `example.qut` file demonstrates:
+The bundled example graphs under `assets/examples/` demonstrate:
 
 ### **Node Types**
 - **Server**: Web servers, database servers
@@ -225,10 +226,9 @@ The file management system integrates with existing API functionality:
 - Export capabilities support multiple formats
 
 ### **Auto-Refresh**
-File-loaded graphs support auto-refresh functionality:
-- Real-time updates from API
-- File changes trigger UI updates
-- Seamless integration with existing refresh system
+The separate auto-refresh module can periodically reload data through the
+configured API loader. It is not a general file-watcher, and editing a `.qut`
+file on disk does not automatically update an already open graph.
 
 ## Security Features
 
@@ -247,10 +247,9 @@ File-loaded graphs support auto-refresh functionality:
 ## Browser Compatibility
 
 ### **Supported Browsers**
-- ✅ Chrome 60+
-- ✅ Firefox 55+
-- ✅ Safari 12+
-- ✅ Edge 79+
+Use a current browser with the File API, Blob API, and JSON support. The optional
+workspace directory feature additionally depends on the browser's File System
+Access API.
 
 ### **Required Features**
 - ✅ File API support

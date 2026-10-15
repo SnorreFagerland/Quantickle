@@ -58,9 +58,10 @@ When depth data is present, the 3D Globe Effects system will:
 
 Load the bundled sample data to explore the depth effects quickly:
 
-1. Navigate to **File → Import Data**
-2. Select `globular_example.csv` (or another sample CSV with depth fields)
-3. Import the file to visualize the preconfigured 3D dataset
+1. Prepare a CSV using the formats above.
+2. Navigate to **File → Import Data**.
+3. Select the CSV and then choose a 3D-capable layout such as **True 3D Globe**
+   or **Absolute**.
 
 ## Visual Effects
 
@@ -91,8 +92,7 @@ Load the bundled sample data to explore the depth effects quickly:
 
 ## File Examples
 
-- `globular_example.csv` - Sample data with depth fields
-- Generated data includes 8 color-coded clusters with varying depths
+The repository does not currently include a `globular_example.csv` fixture.
 
 ## Tips for Best Results
 

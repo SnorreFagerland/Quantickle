@@ -171,9 +171,10 @@ Linux).
   npm run dev
   ```
   This watches `server.js` for changes and restarts the server automatically.
-- To expose the app to other devices on your network, export the `HOST`
-  variable before starting the server (e.g., `HOST=0.0.0.0 npm start`) and make
-  sure your firewall allows inbound connections on the chosen port.
+- To expose the app to other devices on your network, configure the host binding
+  in the server before deployment and make sure your firewall allows inbound
+  connections on the chosen port. The current server reads `PORT`, but does not
+  implement a `HOST` environment variable.
 - If you rely on the SerpApi integration, export `SERPAPI_API_KEY` in your
   shell so that `/api/serpapi` requests succeed.
 

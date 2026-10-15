@@ -7493,6 +7493,40 @@ ${figureCaptionMarkup || ''}
             ? window.NodeTypes
             : {};
 
+        const resolveNodeTypeSettings = (typeName) => {
+            const candidates = [];
+            const addCandidate = value => {
+                if (typeof value !== 'string' || !value.trim()) return;
+                const trimmed = value.trim();
+                if (!candidates.includes(trimmed)) candidates.push(trimmed);
+            };
+
+            addCandidate(typeName);
+            if (window.DomainLoader) {
+                if (typeof window.DomainLoader.getCanonicalTypeKey === 'function') {
+                    addCandidate(window.DomainLoader.getCanonicalTypeKey(typeName));
+                }
+                if (typeof window.DomainLoader.getLegacyTypeKey === 'function') {
+                    addCandidate(window.DomainLoader.getLegacyTypeKey(typeName));
+                }
+            }
+
+            for (const candidate of candidates) {
+                if (nodeTypes[candidate]) return nodeTypes[candidate];
+            }
+
+            const domains = window.DomainLoader?.availableDomains || {};
+            for (const domain of Object.values(domains)) {
+                const types = domain?.types;
+                if (!types || typeof types !== 'object') continue;
+                for (const candidate of candidates) {
+                    if (types[candidate]) return types[candidate];
+                }
+            }
+
+            return nodeTypes.default || null;
+        };
+
         const resolveNodeTypeIcon = (typeSettings) => {
             if (!typeSettings || typeof typeSettings !== 'object') {
                 return '';
@@ -7613,7 +7647,20 @@ ${figureCaptionMarkup || ''}
                 return;
             }
 
-            const typeSettings = nodeTypes[nodeType] || nodeTypes.default || null;
+            const typeSettings = resolveNodeTypeSettings(nodeType);
+
+            const targets = [source];
+            if (node.data && node.data !== source && typeof node.data === 'object') {
+                targets.push(node.data);
+            }
+            if (typeof typeSettings?.color === 'string' && typeSettings.color.trim()) {
+                targets.forEach(target => {
+                    if (typeof target.color !== 'string' || !target.color.trim()) {
+                        target.color = typeSettings.color.trim();
+                    }
+                });
+            }
+
             const iconReference = resolveNodeTypeIcon(typeSettings);
             const normalizedIconReference = normalizeIconReference(iconReference);
             if (!normalizedIconReference) {

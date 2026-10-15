@@ -285,7 +285,7 @@ added. Use **File → Save Graph As…** to persist the result as a `.qut` file.
 ### Performance Optimization
 
 1. **Large Graphs**
-   - Enable WebGL
+   - Use the built-in performance controls and simpler layouts
    - Use simple layouts
    - Disable animations
 
@@ -326,13 +326,13 @@ added. Use **File → Save Graph As…** to persist the result as a `.qut` file.
 
 1. **Graph Not Rendering**
    - Check data format
-   - Verify WebGL support
+   - Verify WebGL support; the renderer falls back to Canvas when unavailable
    - Clear browser cache
 
 2. **Poor Performance**
    - Reduce node count
    - Simplify layout
-   - Enable WebGL
+   - Use simpler layouts and reduce the visible node count
 
 3. **Layout Issues**
    - Try different layouts
@@ -343,8 +343,7 @@ added. Use **File → Save Graph As…** to persist the result as a `.qut` file.
 
 ## Additional Resources
 
-- [API Reference](./API_REFERENCE.md)
-- [Performance Guide](./PERFORMANCE.md)
+- [HTTP API and configuration](./README.md#api)
 - [Contributing Guide](./CONTRIBUTING.md)
 - [Cytoscape.js Documentation](https://js.cytoscape.org)
 

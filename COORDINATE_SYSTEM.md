@@ -23,11 +23,15 @@ Quantickle uses a 3D coordinate system for positioning nodes in space. Understan
 ## Input Coordinate Processing
 
 ### Automatic Coordinate Detection
-Quantickle automatically detects the coordinate range of your input data and applies appropriate normalization:
+The regular Absolute and True 3D Globe layouts consume the node `x`, `y`, and
+`z` values directly (with Absolute clamping them to the configured plotting
+space). AI-assisted ingestion has a separate normalization helper, but it does
+not mean every imported graph is automatically rescaled.
 
-1. **Coordinates in 0-1000 range**: Used as-is (no scaling)
-2. **Coordinates in -100 to 100 range**: Scaled to 0-1000 range
-3. **Other ranges**: Normalized to 0-1000 range
+1. **Coordinates in the plotting-space range**: Used as-is, subject to layout clamping.
+2. **Coordinates outside that range**: Do not assume automatic normalization in
+   the normal import path; normalize them before import if you need a specific
+   spatial mapping.
 
 ### Coordinate Normalization Rules
 
@@ -43,15 +47,17 @@ const scaled = targetMin + (normalized * (targetMax - targetMin));
 ```
 
 ### Special Cases
-- **Zero coordinates (0, 0, 0)**: Automatically centered to (500, 500, 500)
-- **Missing coordinates**: Default to (500, 500, 500)
+- **Zero coordinates (0, 0, 0)**: Remain at the origin; they are not generally
+  recentered.
+- **Missing coordinates**: The Absolute layout places nodes without complete
+  coordinates using its random-placement path.
 
 ## Z-Ordering and Depth Perception
 
 ### Depth Priority Calculation
 ```javascript
 // For general 3D data (non-star data)
-const depthPriority = zCoordinate; // Higher Z = closer to viewer = higher priority
+const depthPriority = originZ - zCoordinate; // Lower Z is rendered closer to the viewer
 
 // For star data (when sun is present)
 const sunZ = 300; // Sun is at Z=300 (fixed for consistency)
@@ -59,8 +65,8 @@ const depthPriority = sunZ - zCoordinate; // Relative to sun position
 ```
 
 ### Z-Index Assignment
-- **Higher Z values**: Closer to viewer, higher z-index (appears in front)
-- **Lower Z values**: Farther from viewer, lower z-index (appears behind)
+- **Lower Z values**: Closer to viewer, higher z-index (appears in front)
+- **Higher Z values**: Farther from viewer, lower z-index (appears behind)
 - **For star data**: Z=300 is the sun's depth, Z<300 appears in front of sun, Z>300 appears behind sun
 
 ### Z-Index Range

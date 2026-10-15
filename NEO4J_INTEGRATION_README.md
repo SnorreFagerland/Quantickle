@@ -2,7 +2,7 @@
 
 Quantickle can store graph data in a [Neo4j](https://neo4j.com/) database.
 The local development server exposes an endpoint that writes the current graph
-structure to Neo4j via the HTTP Query API (v2).
+structure to Neo4j via Neo4j's HTTP transaction commit endpoint.
 
 ## Configuration
 
@@ -15,6 +15,10 @@ If the headers are absent the environment variables are used:
 - `X-Neo4j-Db` or `NEO4J_DB` – database name (default `neo4j`)
 
 ## Local installation guide
+
+> **Container note:** the application code reads `NEO4J_USER` for the server-side
+> Neo4j username. If you use the bundled `docker-compose.yml`, set that variable
+> explicitly; `NEO4J_USERNAME` is not read by `utils/neo4j.js`.
 
 ### Windows
 
@@ -90,7 +94,8 @@ curl -X POST http://localhost:3000/api/neo4j/graph \
       }'
 ```
 
-Nodes are stored with label `QuantickleNode` and edges with label `RELATIONSHIP`.
+Nodes are stored with label `QuantickleNode` and edges with relationship type
+`RELATIONSHIP`.
 Repeated requests merge data rather than duplicating nodes. All node and edge
 properties are saved, including layout coordinates, containerization flags, and
 locked or pinned states. Graph-level metadata (`metadata` object, layout
